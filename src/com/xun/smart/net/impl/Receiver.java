@@ -79,10 +79,8 @@ public class Receiver implements IReceiver,Runnable {
 						byte[] data = new byte[len];
 						//数据校验无误，回调onReceive，传回数据
 						inStream.read(data, 0, len);
-						if (data!=null) {
-							if(listsner!=null){
-								listsner.onReceive(data);
-							}
+						if(listsner!=null){
+							listsner.onReceive(data);
 						}
 					}
 				} catch (IOException e) {
