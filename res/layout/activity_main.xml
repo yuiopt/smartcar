@@ -8,9 +8,42 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.xun.smart.view.MainActivity" >
 
-    <TextView
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/send_wrapper"
+        android:background="#000000" >
+
+        <TextView
+            android:id="@+id/receive"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:textColor="#39f332" />
+        
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/send_wrapper"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/edit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:maxLines="1"
+            android:singleLine="true" />
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="发送" />
+    </LinearLayout>
 
 </RelativeLayout>

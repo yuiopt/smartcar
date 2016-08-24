@@ -1,16 +1,24 @@
 package com.xun.smart.net.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.xun.smart.net.ISender;
 
-public class Sender implements ISender, Runnable {
+import android.util.Log;
 
+public class Sender implements ISender, Runnable {
+	
+	private static final String TAG = "Sender";
+	
 	private Thread mSendThread;
 
 	private boolean isRunning;
+	
+	private OutputStream outStream;
 
 	// 队列，线程安全
 	private BlockingQueue<byte[]> quene;
@@ -22,12 +30,20 @@ public class Sender implements ISender, Runnable {
 	}
 
 	@Override
+	public void setOutputStream(OutputStream outStream) {
+		this.outStream = outStream;
+	}
+
+	@Override
 	public void start() {
 		if (!isRunning) {
+			Log.d(TAG,"Sender Starting...");
 			isRunning = true;
 			if (mSendThread == null) {
 				mSendThread = new Thread(this);
+				mSendThread.setName("Sender");
 				mSendThread.start();
+				Log.d(TAG,"Sender Started...");
 			}
 		}
 	}
@@ -53,20 +69,39 @@ public class Sender implements ISender, Runnable {
 	@Override
 	public void stop() {
 		if (isRunning) {
+			Log.d(TAG,"Sender Stopping...");
+			if(outStream!=null){
+				try {
+					outStream.flush();
+					outStream.close();
+				} catch (IOException e) {
+					outStream = null;
+				}
+			}
 			isRunning = false;
 			quene.clear();
 			mSendThread = null;
 			quene = null;
+			Log.d(TAG,"Sender Stopped...");
 		}
 	}
 
 	@Override
 	public void run() {
+		Log.d(TAG, "Sender Thread Started");
 		while (isRunning) {
 			if (!quene.isEmpty()) {
 				// 队列不为空，出队
 				byte[] data = quene.poll();
 				// TODO 发送数据，自己实现
+				if(outStream!=null){
+					try {
+						outStream.write(data);
+						outStream.flush();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
 				
 			}else{
 				//队列为空，先睡500ms
@@ -77,5 +112,6 @@ public class Sender implements ISender, Runnable {
 				}
 			}
 		}
+		Log.d(TAG, "Sender Thread Exited");
 	}
 }
