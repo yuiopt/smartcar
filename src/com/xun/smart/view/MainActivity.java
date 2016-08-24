@@ -26,7 +26,7 @@ public class MainActivity extends Activity implements OnClickListener,OnReceiveL
 	
 	private static final String TAG = "MainActivity";
 
-	public static final String IP = "192.168.1.100";
+	public static final String IP = "139.129.13.2";
 	
 	public static final int PORT = 8000;
 	
@@ -68,6 +68,8 @@ public class MainActivity extends Activity implements OnClickListener,OnReceiveL
 				Log.d(TAG, "connect success");
 				mSender.setOutputStream(connector.getOutStream());
 				mReceiver.setInputInputStream(connector.getInStream());
+				mReceiver.start();
+				mSender.start();
 			}
 			
 			@Override
@@ -77,8 +79,6 @@ public class MainActivity extends Activity implements OnClickListener,OnReceiveL
 			
 		});
 		connector.connect(IP, PORT);
-		mReceiver.start();
-		mSender.start();
 	}
 
 	@Override
@@ -98,6 +98,7 @@ public class MainActivity extends Activity implements OnClickListener,OnReceiveL
 		String text = mSendEdit.getText().toString().trim();
 		if(!TextUtils.isEmpty(text)){
 			mReceive.append(">>"+text+"\n");
+			mSender.send(text);
 		}
 	}
 
