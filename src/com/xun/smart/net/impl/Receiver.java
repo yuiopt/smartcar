@@ -1,25 +1,30 @@
 package com.xun.smart.net.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import com.xun.smart.net.IReceiver;
 import com.xun.smart.net.OnReceiveListener;
 
 import android.util.Log;
 
-public class Receiver implements IReceiver,Runnable {
-	
+public class Receiver implements IReceiver, Runnable {
+
 	private static final String TAG = "Receiver";
 
 	private Thread mReceiveThread;
-	
+
 	private OnReceiveListener listsner;
-	
+
 	private boolean isRunning;
-	
+
 	private InputStream inStream;
-	
+
 	public Receiver() {
 		isRunning = false;
 	}
@@ -28,17 +33,17 @@ public class Receiver implements IReceiver,Runnable {
 	public void setInputInputStream(InputStream inStream) {
 		this.inStream = inStream;
 	}
-	
+
 	@Override
 	public void start() {
-		if(!isRunning){
-			Log.d(TAG,"Receiver Starting...");
+		if (!isRunning) {
+			Log.d(TAG, "Receiver Starting...");
 			isRunning = true;
-			if(mReceiveThread == null){
+			if (mReceiveThread == null) {
 				mReceiveThread = new Thread(this);
 				mReceiveThread.setName("Receiver");
 				mReceiveThread.start();
-				Log.d(TAG,"Receiver Started...");
+				Log.d(TAG, "Receiver Started...");
 			}
 		}
 	}
@@ -53,41 +58,37 @@ public class Receiver implements IReceiver,Runnable {
 
 	@Override
 	public void stop() {
-		if(isRunning){
-			Log.d(TAG,"Receiver Stopping...");
-			if(inStream!=null){
-				try {
-					inStream.close();
-				} catch (IOException e) {
-					inStream = null;
-				}
-			}
+		if (isRunning) {
+			Log.d(TAG, "Receiver Stopping...");
 			isRunning = false;
-			Log.d(TAG,"Receiver Stopped...");
+			Log.d(TAG, "Receiver Stopped...");
 		}
 	}
 
 	@Override
 	public void run() {
 		Log.d(TAG, "Receiver Thread Started");
-		while(isRunning){
-			//TODO 收数据，自己实现，校验都在这里处理
-			if(inStream!=null){
-				try {
-					int len = inStream.available();
-					if(len > 0){
-						byte[] data = new byte[len];
-						//数据校验无误，回调onReceive，传回数据
-						inStream.read(data, 0, len);
-						if(listsner!=null){
-							listsner.onReceive(data);
-						}
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
+		while (isRunning) {
+			try {
+				if (reader.ready()) {
+					String line = reader.readLine();
+					// 回调onReceive，传回数据
+					if (listsner != null) {
+						line+="\n";
+						listsner.onReceive(line.getBytes(Charset.forName("UTF-8")));
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
+			} catch (IOException e) {
 			}
-			
+		}
+		if (inStream != null) {
+			try {
+				reader.close();
+				inStream.close();
+			} catch (IOException e) {
+				inStream = null;
+			}
 		}
 		Log.d(TAG, "Receiver Thread Exited");
 	}

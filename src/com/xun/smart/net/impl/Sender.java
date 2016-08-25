@@ -70,14 +70,6 @@ public class Sender implements ISender, Runnable {
 	public void stop() {
 		if (isRunning) {
 			Log.d(TAG,"Sender Stopping...");
-			if(outStream!=null){
-				try {
-					outStream.flush();
-					outStream.close();
-				} catch (IOException e) {
-					outStream = null;
-				}
-			}
 			isRunning = false;
 			quene.clear();
 			mSendThread = null;
@@ -93,7 +85,6 @@ public class Sender implements ISender, Runnable {
 			if (!quene.isEmpty()) {
 				// 队列不为空，出队
 				byte[] data = quene.poll();
-				// TODO 发送数据，自己实现
 				if(outStream!=null){
 					try {
 						outStream.write(data);
@@ -110,6 +101,14 @@ public class Sender implements ISender, Runnable {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
+			}
+		}
+		if(outStream!=null){
+			try {
+				outStream.flush();
+				outStream.close();
+			} catch (IOException e) {
+				outStream = null;
 			}
 		}
 		Log.d(TAG, "Sender Thread Exited");
